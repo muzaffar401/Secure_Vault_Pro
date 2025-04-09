@@ -190,26 +190,43 @@ def check_password_strength(password):
     
     return score, feedback
 
-def visualize_password_strength(score):
-    """Create a password strength visualization"""
+def visualize_password_strength(score, container_width=400):
+    """Create a responsive password strength visualization that stays within containers"""
     colors = ['#f44336', '#FF5722', '#FFC107', '#4CAF50', '#2E7D32']
     labels = ['Very Weak', 'Weak', 'Moderate', 'Strong', 'Very Strong']
     
-    fig, ax = plt.subplots(figsize=(8, 2))
-    ax.barh([''], [score], color=colors[score-1])
+    # Convert pixels to inches (assuming 100dpi)
+    width_inches = container_width / 100
+    
+    # Create figure with dynamic sizing
+    fig, ax = plt.subplots(figsize=(width_inches, 0.4))  # Reduced height
+    
+    # Visualization elements
+    ax.barh([''], [5], color='#eeeeee', height=0.1)  # Background track
+    ax.barh([''], [score], color=colors[score-1], height=0.1)  # Strength indicator
+    
+    # Configure appearance
     ax.set_xlim(0, 5)
-    ax.set_xticks([])
-    ax.set_yticks([])
-    ax.text(2.5, -0.2, labels[score-1], ha='center', va='center', fontsize=12, 
-            color=colors[score-1], fontweight='bold')
+    ax.axis('off')
     
+    # Center-aligned label
+    ax.text(2.5, 0.3, labels[score-1],
+            ha='center', va='center',
+            fontsize=8,  # Smaller font size
+            color=colors[score-1],
+            fontweight='bold')
+    
+    # Strength indicator dots (simplified)
     for i in range(5):
-        ax.plot([i, i+1], [0, 0], color='white' if i < score-1 else 'lightgray', 
-                linewidth=10, solid_capstyle='butt')
+        ax.plot(i+0.5, -0.2, 'o',
+                markersize=4,  # Smaller dots
+                color=colors[i] if i < score else '#e0e0e0')
     
-    plt.tight_layout()
+    # Tight layout with controlled margins
+    plt.tight_layout(pad=0.5)
+    fig.subplots_adjust(left=0.01, right=0.99, bottom=0.4, top=0.6)
+    
     return fig
-
 # Main application function
 def main():
     # Initialize encryption
@@ -225,6 +242,8 @@ def main():
         st.session_state.lockout_time = None  # Track when lockout started
     if 'menu_choice' not in st.session_state:
         st.session_state.menu_choice = "Dashboard"  # Track current menu selection
+    if 'scanned_data' not in st.session_state:
+        st.session_state.scanned_data = ''
 
     # Data management functions
     def load_data():
@@ -452,16 +471,30 @@ def main():
                     with stylable_container(
                         "store-data-primary-button",
                         css_styles="""
-                        button {
-                            background: linear-gradient(to right, #11998e, #38ef7d);
-                            color: white;
-                            border: none;
-                            padding: 12px 24px;
-                            border-radius: 8px;
-                            font-weight: bold;
-                            width: 100%;
-                            margin-top: 10px;
-                        }
+                     button {
+        background: linear-gradient(to right, #11998e, #38ef7d);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: bold;
+        width: 100%;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    button:hover {
+        background: linear-gradient(to right, #0d7a6f, #2ecf6d);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transform: translateY(-1px);
+        color: white !important;
+    }
+    button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        color: white !important;
+    }
+
                         """
                     ):
                         if st.button("Encrypt & Store Data"):
@@ -618,16 +651,29 @@ def main():
                     with stylable_container(
                         "retrieve-primary-button",
                         css_styles="""
-                        button {
-                            background: linear-gradient(to right, #8E2DE2, #4A00E0);
-                            color: white;
-                            border: none;
-                            padding: 12px 24px;
-                            border-radius: 8px;
-                            font-weight: bold;
-                            width: 100%;
-                            margin-top: 10px;
-                        }
+                       button {
+        background: linear-gradient(to right, #8E2DE2, #4A00E0);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: bold;
+        width: 100%;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    button:hover {
+        background: linear-gradient(to right, #7A25C7, #3F00B8);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        transform: translateY(-1px);
+        color: white !important;
+    }
+    button:active {
+        transform: translateY(1px);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        color: white !important;
+    }
                         """
                     ):
                         if st.button("Decrypt Data"):
@@ -675,38 +721,66 @@ def main():
                                         st.error(f"❌ Authentication failed! Attempts remaining: {remaining_attempts}")
 
     elif st.session_state.menu_choice == "Data Vault":
-        # View showing all stored encrypted items
+    # View showing all stored encrypted items
         st.markdown(gradient_text("Your Secure Data Vault", "#f46b45", "#eea849", "vault_header"), unsafe_allow_html=True)
-        
+    
         if not stored_data:
             st.info("ℹ️ Your vault is empty. Store some data to see it here.")
         else:
-            # Show vault statistics
+        # Show vault statistics
             st.markdown(f"""
-            <div class="vault-stats">
-                <div class="stat-box">
-                    <span class="stat-number">{len(stored_data)}</span>
-                    <span class="stat-label">Encrypted Items</span>
-                </div>
+        <div class="vault-stats">
+            <div class="stat-box">
+                <span class="stat-number">{len(stored_data)}</span>
+                <span class="stat-label">Encrypted Items</span>
             </div>
-            """, unsafe_allow_html=True)
-            
-            # List all stored items in expanders
-            for name, data in stored_data.items():
-                with st.expander(f"🔒 {name}", expanded=False):
-                    col1, col2 = st.columns([3, 1])
-                    with col1:
-                        # Show truncated encrypted data
-                        st.code(data["encrypted_text"][:200] + "..." if len(data["encrypted_text"]) > 200 else data["encrypted_text"])
-                        st.caption(f"Stored on: {datetime.fromisoformat(data['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}")
-                    
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # List all stored items in expanders
+        for name, data in stored_data.items():
+            with st.expander(f"🔒 {name}", expanded=False):
+                col1, col2 = st.columns([3, 1])
+                with col1:
+                    # Show truncated encrypted data
+                    st.code(data["encrypted_text"][:200] + "..." if len(data["encrypted_text"]) > 200 else data["encrypted_text"])
+                    st.caption(f"Stored on: {datetime.fromisoformat(data['timestamp']).strftime('%Y-%m-%d %H:%M:%S')}")
+                         
                     with col2:
-                        # Button to retrieve this specific item
-                        if st.button("Retrieve", key=f"retrieve_{name}"):
-                            st.session_state.retrieve_encrypted = data["encrypted_text"]
-                            st.session_state.menu_choice = "Retrieve Data"
-                            st.rerun()  # Switch to retrieve view
-
+                    # Button to retrieve this specific item with gradient styling
+                        with stylable_container(
+                        key=f"retrieve-button-{name}",
+                            css_styles="""
+                        button {
+                            background: linear-gradient(to right, #f46b45, #eea849);
+                            color: white;
+                            border: none;
+                            padding: 8px 16px;
+                            border-radius: 8px;
+                            font-weight: bold;
+                            width: 100%;
+                            transition: all 0.3s ease;
+                            cursor: pointer;
+                            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                        }
+                        button:hover {
+                            background: linear-gradient(to right, #e05a35, #dd9839);
+                            transform: translateY(-1px);
+                            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                            color: white !important;
+                        }
+                        button:active {
+                            transform: translateY(1px);
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+                            color: white !important;
+                        }
+                        """
+                    ):
+                            if st.button("Retrieve", key=f"retrieve_{name}"):
+                                st.session_state.scanned_data = data["encrypted_text"]
+                                st.session_state.menu_choice = "Retrieve Data"
+                                st.rerun()
+                            
     elif st.session_state.menu_choice == "Login":
         # Authentication view for locked-out users
         st.markdown(gradient_text("Security Reauthentication", "#ff416c", "#ff4b2b", "login_header"), unsafe_allow_html=True)
