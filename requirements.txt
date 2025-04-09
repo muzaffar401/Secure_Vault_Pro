@@ -1,0 +1,7 @@
+streamlit
+streamlit-extras
+cryptography
+matplotlib
+opencv-python
+qrcode
+numpy
