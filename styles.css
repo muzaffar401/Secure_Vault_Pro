@@ -1,0 +1,135 @@
+/* Main Styles */
+.stApp {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Card Styles */
+.card {
+    background: white;
+    height: 50vh;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.st-emotion-cache-12fmjuu{
+    background-color:#EDF0F6 ;
+    z-index: 0;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-icon {
+    font-size: 32px;
+    margin-bottom: 15px;
+    color: #6a11cb;
+}
+
+.card-content h3 {
+    margin-top: 0;
+    color: #333;
+}
+
+.card-content p {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Sidebar Styles */
+.sidebar-header {
+    padding: 20px 0;
+    text-align: center;
+}
+
+.sidebar-header h1 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.subtitle {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.sidebar-footer {
+    position: absolute;
+    bottom: 20px;
+    width: calc(100% - 40px);
+}
+
+.security-status {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.security-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.security-indicator.active {
+    background-color: #28a745;
+}
+
+/* Warning Box */
+.warning-box {
+    background-color: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 12px;
+    border-radius: 4px;
+    margin: 20px 0;
+}
+
+.warning-box strong {
+    color: #856404;
+}
+
+.warning-box p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+/* Vault Stats */
+.vault-stats {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.stat-box {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    text-align: center;
+    margin-right: 20px;
+}
+
+.stat-number {
+    font-size: 36px;
+    font-weight: bold;
+    display: block;
+    color: #6a11cb;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Hero Text */
+.hero-subtext {
+    font-size: 18px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
