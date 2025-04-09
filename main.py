@@ -535,15 +535,15 @@ def main():
                                     """, unsafe_allow_html=True)
                                     
                                     # Download buttons
-                                    col1, col2 = st.columns(2)
-                                    with col1:
+                                    col = st.columns(1)[0]
+                                    with col:
                                         st.download_button(
                                             label="Download Encrypted Data",
                                             data=encrypted_text,
                                             file_name=f"secure_vault_{datetime.now().strftime('%Y%m%d')}.enc",
                                             mime="text/plain"
                                         )
-                                    with col2:
+                                    with col:
                                         st.download_button(
                                             label="Download QR Code",
                                             data=qr_img,
