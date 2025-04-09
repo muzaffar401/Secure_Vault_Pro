@@ -1,177 +1,156 @@
 
-# 🔐 Secure Vault Pro
+# 🔐 Secure Vault Pro (QR Code Edition)
 
-**Military-Grade Data Protection using Python & Streamlit**
-
-Secure Vault Pro is an advanced encryption application providing AES-256 encryption and PBKDF2-based key derivation to protect your sensitive data. Built with simplicity and security in mind, it ensures your data is safe—even if the encrypted files are exposed.
-
----
-
-## 🌟 Features
-
-- **Bank-Level Security**: AES-256 encryption with PBKDF2 key derivation
-- **Zero-Knowledge Protocol**: We never store or see your passkeys
-- **Military Compliance**: Meets strict security standards
-- **User-Friendly Interface**: Simple and intuitive design
-- **Data Organization**: Name and categorize your encrypted items
-- **Secure Sharing**: Encrypted data can be safely shared
+**Military-Grade Data Protection using Python & Streamlit**  
+Now with QR Code Integration for Hybrid Digital-Physical Security
 
 ---
 
-## 🚀 Getting Started
+![image](https://github.com/user-attachments/assets/4cb60ae7-5dfc-405c-86c1-67fff4b85df1)
 
-### Prerequisites
+## 🌟 Enhanced Features
 
-- Python 3.7+
-- `pip` package manager
+### 🔳 QR Code Integration
+- **QR Code Generation**: Automatically create QR codes for encrypted data.
+- **QR Scanning**: Decrypt data by scanning QR codes from images.
+- **Mobile-Friendly**: Easily transfer encrypted data between devices.
+- **Error Correction**: Built-in L-level error correction for damaged codes.
+- **Visual Verification**: Quickly identify encrypted data via QR codes.
 
-### Installation
+---
+
+## 🚀 Getting Started (Updated)
+
+### 🧩 Installation
+
+Install the necessary dependencies:
 
 ```bash
-git clone https://github.com/yourusername/secure-vault-pro.git
-cd secure-vault-pro
-pip install -r requirements.txt
-```
-
-### Run the App
-
-```bash
-streamlit run secure_vault.py
+# New dependencies for QR handling
+pip install opencv-python qrcode
 ```
 
 ---
 
-## 🧭 Navigation Guide
+## 🧭 Navigation Guide Updates
 
-### 📊 Dashboard
-- Shows your security status and encrypted item count.
+### 🔐 Store Data (QR Additions)
+- Generates QR code with encrypted data
+- Download QR as PNG for offline storage
+- Visual confirmation of encryption success
 
-### 🔐 Store Data
-- Enter your sensitive info
-- Create & confirm a strong passkey
-- Optionally name the entry
-- Copy and store the encrypted output
-
-### 🔓 Retrieve Data
-- Paste encrypted data
-- Enter your passkey to decrypt and view
-
-### 🗄️ Data Vault
-- View and manage all encrypted items
-- Click to decrypt or view metadata
+#### New Options:
+- ✅ **Download QR Code** button
+- ✅ **Preview of generated QR code**
+- ✅ **Error-corrected QR versions**
 
 ---
 
-## 🔒 Security Features
+### 🔓 Retrieve Data (QR Features)
+- Upload QR code images (PNG/JPG) for decryption
+- Drag-and-drop QR code support
+- Mobile camera scanning support (via image upload)
 
-### 🔧 Encryption Process
-- AES-128 (via Fernet) in CBC mode
-- PBKDF2-HMAC-SHA256 with 100,000 iterations
-- Unique 16-byte salt per encryption
-
-### 🔐 Account Protection
-- 3 failed attempts = 5-minute lockout
-- Master password required for critical operations
-- Session-based security controls using Streamlit session state
+#### New Flow:
+1. Choose between **text input** or **QR upload**
+2. Scan/upload QR code
+3. Automatic decryption initiation
 
 ---
 
-## 💡 Best Practices
+## 🔒 Enhanced Security Features
 
-### Passkey Creation
-- Use 12+ characters
-- Combine uppercase, lowercase, numbers, and symbols
-- Prefer passphrases like `CorrectHorseBatteryStaple42!`
-
-### Data Storage
-- Store encrypted data and passkeys separately
-- Keep backups
-- Use a password manager for keys
-
-### Sharing Data
-- Share data and passkeys via different secure channels
-- Use expiration dates when possible
+### 🛡️ QR Security Measures
+- **Static QR Codes**: No phoning home – all data contained in code
+- **Tamper Evidence**: Visual distortion detection
+- **Size Optimization**: Auto-adjusts QR version to data size
+- **Secure Deletion**: No QR data remains in temp files
 
 ---
 
-## 🛠️ Technical Details
+## 💡 New Best Practices
 
-- **Encryption Stack**:
-  - `Fernet`: AES-128, CBC mode, PKCS7 padding
-  - `PBKDF2`: SHA-256, 100,000 iterations
-  - 16-byte random salt for each encryption
-
-- **Data Storage**:
-  - Encrypted data in `encrypted_data.json`
-  - Encryption key in `secret.key` (auto-generated on first run)
-
-- **Session Management**:
-  - Streamlit session state for:
-    - Lockout timers
-    - Failed attempt tracking
-    - Navigation memory
+### 📌 QR Code Handling
+- Print important QR codes for physical backup
+- Store QR codes separately from passkeys
+- Use password-protected ZIP files when emailing QR codes
+- Prefer QR codes for large encrypted data (>500 characters)
 
 ---
 
-## 📜 License
+## 🛠️ Technical Details (QR Additions)
 
-MIT License. See the [LICENSE](LICENSE) file for details.
+### ⚙️ QR Implementation
+
+#### Generation:
+- Library: `qrcode`
+- **Error Correction**: L Level (7% recovery)
+- **Optimal version detection**: QR Versions 1–40
+- **Customization**: Adjustable size and color
+
+#### Scanning:
+- Library: `OpenCV`
+- Supports rotated/damaged QR codes
+- Detects multiple codes in one image
+- Corrects EXIF orientation
+
+### 📁 File Support
+- **Input Formats**: PNG, JPG, JPEG
+- **Output Format**: PNG (300dpi)
+- **Max Size**: 4096x4096 pixels
 
 ---
 
-## 🙏 Acknowledgments
+## 🎥 Updated Demo Walkthrough
 
-- **Streamlit** – for their powerful UI framework
-- **Cryptography.io** – for robust encryption libraries
-- **Open Source Community** – for inspiration & collaboration
+### ✅ Storing Data with QR
+- Download QR code alongside encrypted text
+- Optional: Print QR code for physical storage
 
----
-
-## 🎥 Demo Walkthrough
-
-### ✅ Storing Data
-
-1. Navigate to **Store Data**
-2. Enter sensitive data (e.g., API keys, passwords)
-3. Set a strong passkey (e.g., `Secur3P@sskey2023!`)
-4. Name your entry (optional)
-5. Click **Encrypt & Store**
-6. Copy the encrypted output and store it securely
-
-### 🔓 Retrieving Data
-
+### 🔓 Retrieving via QR
 1. Go to **Retrieve Data**
-2. Paste encrypted string
-3. Enter passkey
-4. Click **Decrypt Data**
-5. View your original content
-
-### 🗄️ Managing Your Vault
-
-- Navigate to **Data Vault**
-- View all saved encrypted entries
-- Click **Retrieve** to decrypt
-- View metadata like storage date
+2. Click **Upload QR Code**
+3. Select image from device
+4. Encrypted data auto-populates
+5. Enter passkey to decrypt
 
 ---
 
-## ❓ FAQ
+## 🔁 QR Workflow Diagram
 
-**Q: What if I forget my passkey?**  
-A: Unfortunately, recovery is not possible. This ensures maximum security.
-
-**Q: Is data still safe if someone gets `encrypted_data.json`?**  
-A: Yes. Without your passkey, the data is practically unbreakable.
-
-**Q: Can I use this on multiple devices?**  
-A: Yes. Just securely transfer `encrypted_data.json` and `secret.key`.
-
-**Q: How do I change the master password?**  
-A: Edit the `MASTER_PASSWORD` constant in the code manually.
-
-**Q: Is this suitable for enterprise use?**  
-A: For enterprises, we recommend adding extra layers like hardware-based security and centralized key management.
+```mermaid
+graph TD
+    A[Encrypt Data] --> B[Generate QR]
+    B --> C[Store Separately]
+    C --> D[Share via QR]
+    D --> E[Scan when Needed]
+```
 
 ---
 
-**Secure Vault Pro** – Because your privacy deserves military-grade protection.
+## ❓ Updated FAQ
+
+**Q: How secure are QR codes compared to text?**  
+A: Equally secure – they contain the same encrypted data in visual format.
+
+**Q: What QR code sizes are supported?**  
+A: Any size from 2x2 cm to poster-sized prints. Minimum 300px resolution recommended.
+
+**Q: Can I edit encrypted QR codes?**  
+A: Any modification will break the code. Use error correction for minor damage.
+
+**Q: How many characters can a QR store?**  
+A: Version 40 QR codes can store up to 2953 bytes – perfect for most encrypted data.
+
+**Q: QR scanning not working?**  
+A: Ensure:
+- Adequate lighting
+- Flat, non-reflective surface
+- Complete code visible in image
+- Minimum 50px margin around code
+
+---
+
+## 🔐 This Update Transforms Secure Vault Pro
+
+A hybrid digital-physical security solution – combining modern encryption with practical QR code functionality for real-world use cases.

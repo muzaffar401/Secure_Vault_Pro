@@ -1,12 +1,21 @@
 # Import necessary libraries
+# For custom styled containers
+from streamlit_extras.stylable_container import stylable_container
 import streamlit as st  # For building the web app interface
 import hashlib  # For password hashing and security functions
 from cryptography.fernet import Fernet  # For encryption/decryption
 import json  # For handling data storage in JSON format
 import os  # For file system operations
 import time  # For adding delays in the UI
-from datetime import datetime, timedelta  # For handling timestamps and lockout periods
-import base64  # For encoding/decoding (though not directly used in current code)
+# For handling timestamps and lockout periods
+from datetime import datetime, timedelta
+import base64  # For encoding/decoding
+import qrcode  # For QR code generation
+from io import BytesIO  # For handling byte streams
+import matplotlib.pyplot as plt  # For password strength visualization
+import re  # For password strength regex checking
+import cv2
+import numpy as np
 
 # Set page configuration FIRST (Streamlit requirement)
 st.set_page_config(
@@ -17,17 +26,21 @@ st.set_page_config(
 )
 
 # Additional UI components
-from streamlit_extras.stylable_container import stylable_container  # For custom styled containers
 
 # Constants
 MAX_ATTEMPTS = 3  # Maximum failed login attempts before lockout
 LOCKOUT_TIME = 300  # 5 minutes in seconds for lockout duration
 DATA_FILE = "encrypted_data.json"  # File to store encrypted data
-MASTER_PASSWORD = "admin123"  # Hardcoded master password (Note: In production, use environment variables)
+# Hardcoded master password (Note: In production, use environment variables)
+MASTER_PASSWORD = "admin123"
 
 # Custom CSS for enhanced UI
+
+
 def local_css(file_name):
     """Load custom CSS styles from a file and inject additional styles"""
+
+
     with open(file_name) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
     # Additional CSS for gradient text consistency
@@ -45,6 +58,28 @@ def local_css(file_name):
     }
     .stMarkdown h1 {
         margin: 0.25em 0 !important;
+    }
+    .qr-code-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .password-strength-meter {
+        height: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        transition: all 0.3s ease;
+    }
+    .password-criteria {
+        margin: 5px 0;
+        font-size: 14px;
+    }
+    .criteria-met {
+        color: #4CAF50;
+    }
+    .criteria-not-met {
+        color: #f44336;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -94,6 +129,86 @@ def card_component(title, content, icon):
         </div>
     </div>
     """
+
+# QR Code Generation
+def generate_qr_code(data):
+    """Generate QR code from data and return as bytes"""
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(data)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+# Password Strength Checker
+def check_password_strength(password):
+    """Check password strength and return score (0-4) and feedback"""
+    score = 0
+    feedback = []
+    
+    # Length check
+    if len(password) >= 12:
+        score += 1
+        feedback.append(("✓ At least 12 characters", True))
+    else:
+        feedback.append(("✗ At least 12 characters (currently " + str(len(password)) + ")", False))
+    
+    # Lowercase check
+    if re.search(r'[a-z]', password):
+        score += 1
+        feedback.append(("✓ Contains lowercase letters", True))
+    else:
+        feedback.append(("✗ Contains lowercase letters", False))
+    
+    # Uppercase check
+    if re.search(r'[A-Z]', password):
+        score += 1
+        feedback.append(("✓ Contains uppercase letters", True))
+    else:
+        feedback.append(("✗ Contains uppercase letters", False))
+    
+    # Digit check
+    if re.search(r'[0-9]', password):
+        score += 1
+        feedback.append(("✓ Contains numbers", True))
+    else:
+        feedback.append(("✗ Contains numbers", False))
+    
+    # Special char check
+    if re.search(r'[^A-Za-z0-9]', password):
+        score += 1
+        feedback.append(("✓ Contains special characters", True))
+    else:
+        feedback.append(("✗ Contains special characters", False))
+    
+    return score, feedback
+
+def visualize_password_strength(score):
+    """Create a password strength visualization"""
+    colors = ['#f44336', '#FF5722', '#FFC107', '#4CAF50', '#2E7D32']
+    labels = ['Very Weak', 'Weak', 'Moderate', 'Strong', 'Very Strong']
+    
+    fig, ax = plt.subplots(figsize=(8, 2))
+    ax.barh([''], [score], color=colors[score-1])
+    ax.set_xlim(0, 5)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.text(2.5, -0.2, labels[score-1], ha='center', va='center', fontsize=12, 
+            color=colors[score-1], fontweight='bold')
+    
+    for i in range(5):
+        ax.plot([i, i+1], [0, 0], color='white' if i < score-1 else 'lightgray', 
+                linewidth=10, solid_capstyle='butt')
+    
+    plt.tight_layout()
+    return fig
 
 # Main application function
 def main():
@@ -310,8 +425,22 @@ def main():
                         "Enter Passkey:",
                         type="password",
                         placeholder="Create a strong passkey",
-                        help="Minimum 8 characters, include numbers and special characters"
+                        help="Minimum 8 characters, include numbers and special characters",
+                        key="passkey_input"
                     )
+                    
+                    # Password strength visualization
+                    if passkey:
+                        score, feedback = check_password_strength(passkey)
+                        st.pyplot(visualize_password_strength(score))
+                        
+                        # Password criteria feedback
+                        for item, met in feedback:
+                            st.markdown(f"""
+                            <div class="password-criteria {'criteria-met' if met else 'criteria-not-met'}">
+                                {item}
+                            </div>
+                            """, unsafe_allow_html=True)
                     
                     passkey_confirm = st.text_input(
                         "Confirm Passkey:",
@@ -357,6 +486,12 @@ def main():
                                 # Show success message with encrypted data
                                 with st.expander("🔐 Your Encrypted Data", expanded=True):
                                     st.code(encrypted_text)
+                                    
+                                    # Generate and display QR code
+                                    st.markdown("### QR Code for Encrypted Data")
+                                    qr_img = generate_qr_code(encrypted_text)
+                                    st.image(qr_img, caption="Scan this QR code to save your encrypted data", width=200)
+                                    
                                     st.markdown("""
                                     <div class="warning-box">
                                         <strong>⚠️ Important Security Notice:</strong>
@@ -366,13 +501,22 @@ def main():
                                     </div>
                                     """, unsafe_allow_html=True)
                                     
-                                    # Download button for encrypted data
-                                    st.download_button(
-                                        label="Download Encrypted Data",
-                                        data=encrypted_text,
-                                        file_name=f"secure_vault_{datetime.now().strftime('%Y%m%d')}.enc",
-                                        mime="text/plain"
-                                    )
+                                    # Download buttons
+                                    col1, col2 = st.columns(2)
+                                    with col1:
+                                        st.download_button(
+                                            label="Download Encrypted Data",
+                                            data=encrypted_text,
+                                            file_name=f"secure_vault_{datetime.now().strftime('%Y%m%d')}.enc",
+                                            mime="text/plain"
+                                        )
+                                    with col2:
+                                        st.download_button(
+                                            label="Download QR Code",
+                                            data=qr_img,
+                                            file_name=f"secure_vault_{datetime.now().strftime('%Y%m%d')}.png",
+                                            mime="image/png"
+                                        )
 
     elif st.session_state.menu_choice == "Retrieve Data":
         # Data decryption view
@@ -415,8 +559,40 @@ def main():
                         "Encrypted Data:",
                         height=200,
                         placeholder="Paste your encrypted data here...",
-                        key="retrieve_data_input"
+                        key="retrieve_data_input",
+                        value=st.session_state.get('retrieve_encrypted', '')
                     )
+                    
+# In the QR code scanning section, update to:
+                    uploaded_file = st.file_uploader("Or upload QR code:", type=['png', 'jpg', 'jpeg'], key="qr_uploader")
+                    if uploaded_file is not None and not st.session_state.get('qr_processed', False):
+                        try:
+                            file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+                            img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+                            qr_detector = cv2.QRCodeDetector()
+                            data, points, _ = qr_detector.detectAndDecode(img)
+        
+                            if data:
+                                st.session_state.scanned_data = data
+                                st.session_state.qr_processed = True  # Mark as processed
+                                st.success("QR code scanned successfully!")
+                            else:
+                                st.error("No QR code found in the image")
+                        except Exception as e:
+                            st.error(f"Error scanning QR code: {str(e)}")
+                    elif uploaded_file is None:
+    # Reset the processing flag when no file is uploaded
+                        st.session_state.qr_processed = False
+
+# In your text_area widget:
+            encrypted_text = st.text_area(
+    "Encrypted Data:",
+    height=200,
+    placeholder="Paste your encrypted data here...",
+    key="encrypted_data_input",
+    value=st.session_state.get('scanned_data', '')
+)
+
             
             with col2:
                 # Passkey input
